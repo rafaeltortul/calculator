@@ -1,3 +1,4 @@
+// Importando módulos necessários
 const express = require('express');
 const bodyParser = require('body-parser');
 const twilio = require('twilio');
@@ -20,6 +21,16 @@ const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUT
 
 // Objeto para armazenar códigos de verificação e telefones
 let verificationCodes = {};
+
+// Rota para redirecionar para a página de registro ao acessar a raiz do site
+app.get('/', (req, res) => {
+    res.redirect('/register'); // Redireciona para a página de registro
+});
+
+// Rota para servir a página de registro
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
 
 // Rota para registrar um usuário e enviar um código de verificação
 app.post('/register', async (req, res) => {
@@ -73,16 +84,6 @@ app.post('/verify-code', (req, res) => {
     } else {
         res.status(400).json({ success: false, message: "Código inválido." });
     }
-});
-
-// Redirecionar para a página de registro como página inicial
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'register.html'));
-});
-
-// Servir a página de registro
-app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Definindo a porta para o servidor escutar
