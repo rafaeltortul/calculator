@@ -83,6 +83,11 @@ app.post('/verify-code', (req, res) => {
     }
 });
 
+// Redirecionar qualquer outra rota não especificada para a página de registro
+app.get('*', (req, res) => {
+    res.redirect('/register');
+});
+
 // Definindo a porta para o servidor escutar
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
