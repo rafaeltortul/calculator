@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro para Acesso a Calculadora de Eventos com Flores</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f9f9f9; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            padding: 10px;
+            overflow: hidden; 
+        }
+        .form-container { 
+            width: 360px; 
+            padding: 20px; 
+            background-color: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .form-container input, .form-container button { 
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 8px; 
+            box-sizing: border-box; 
+            border: 1px solid #ddd; 
+            border-radius: 4px;
+            font-size: 14px; 
+        }
+        .phone-input-container {
+            position: relative;
+            display: flex; 
+            align-items: center; 
+            margin-top: 8px; 
+        }
+        #phone-prefix { 
+            position: absolute; 
+            left: 12px; 
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa; 
+            pointer-events: none;
+            font-size: 14px; /* Tamanho da fonte do prefixo */
+            font-weight: bold; /* Negrito para destacar */
+        }
+        #phone { 
+            padding-left: 45px; 
+            font-size: 14px;
+            height: 38px; /* Ajuste para alinhar o +55 verticalmente */
+        }
+        img.logo {
+            width: 100px; 
+            margin: 0 auto 15px; 
+            display: block;
+        }
+        label {
+            display: block; 
+            margin: 5px 0 3px; 
+            text-align: left;
+            font-size: 13px; 
+            color: #333;
+        }
+        h2 {
+            margin-top: 5px;
+            font-size: 18px;
+            color: #555;
+        }
+        button {
+            background-color: #374F37; /* Verde musgo */
+            color: #937251; /* Fonte dourada */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+            font-weight: bold; /* Negrito */
+            margin-top: 10px; /* Consistente com os campos */
+        }
+        button:hover {
+            background-color: #2E3F2E; /* Tom mais escuro ao passar o mouse */
+        }
+        .code-section {
+            margin-top: 10px; 
+        }
+        .tooltip {
+            display: none;
+            position: absolute;
+            left: 110%; /* Posição à direita da caixa de telefone */
+            top: 50%; 
+            transform: translateY(-50%);
+            background-color: #fff;
+            color: #333;
+            padding: 10px; /* Maior padding para mais destaque */
+            border: 1px solid #ddd;
+            border-radius: 6px; /* Arredondamento suave */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 12px; /* Aumento do tamanho da fonte */
+            z-index: 10;
+            width: 230px; /* Maior largura para mais espaço de texto */
+            text-align: left;
+        }
+        .phone-input-container:focus-within .tooltip {
+            display: block; /* Mostrar tooltip ao focar no campo */
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Adicionando o logo -->
+        <img src="logo.png" alt="Logo" class="logo">
+        <h2>Cadastro para Acesso a Calculadora de Eventos com Flores</h2>
+        <form id="registerForm">
+            <label for="name">Nome Completo:</label>
+            <input type="text" id="name" required>
+
+            <label for="phone">Telefone:</label>
+            <div class="phone-input-container">
+                <span id="phone-prefix">+55</span>
+                <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required>
+                <div class="tooltip">Digite o DDD com 2 algarismos (exemplo: 67) e o telefone com 9 algarismos sem espaçamento (exemplo: 999999999). Portanto, preencha seu telefone com os 11 algarismos diretamente.</div>
+            </div>
+
+            <label for="event">Nome do Evento:</label>
+            <input type="text" id="event" required>
+            <label for="date">Data do Evento:</label>
+            <input type="date" id="date" required>
+            <button type="button" onclick="generateCode()">Gerar Código de Verificação</button>
+        </form>
+        
+        <!-- Campo de verificação, aparecerá logo abaixo do botão -->
+        <div id="codeSection" class="code-section hidden">
+            <label for="verificationCode">Código de Verificação:</label>
+            <input type="text" id="verificationCode" required>
+            <button type="button" onclick="verifyCode()">Continuar</button>
+        </div>
+    </div>
+
+    <script>
+    function generateCode() {
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const event = document.getElementById('event').value;
+        const date = document.getElementById('date').value;
+
+        // Verificar se todos os campos estão preenchidos
+        if (!name || !phone || !event || !date) {
+            alert('Por favor, preencha todos os campos.');
+            return;
+        }
+
+        fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, event, date })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('codeSection').classList.remove('hidden'); // Mostrar campo de verificação
+                document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                alert("Código de verificação enviado ao seu telefone.");
+            } else {
+                alert("Erro ao enviar código: " + data.message);
+            }
+        }).catch(error => alert("Erro ao enviar requisição: " + error));
+    }
+
+    function verifyCode() {
+        const phone = document.getElementById('phone').value;
+        const code = document.getElementById('verificationCode').value;
+
+        fetch('/verify-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, code })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                window.location.href = 'index.html'; // Redirecionar para a calculadora
+            } else {
+                alert("Código inválido: " + data.message);
+            }
+        }).catch(error => alert("Erro ao verificar código: " + error));
+    }
+    </script>
+</body>
+</html>

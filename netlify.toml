@@ -1,0 +1,13 @@
+[build]
+command = "npm install && npm run build"
+publish = "public"
+
+[dev]
+command = "npm start"
+targetPort = 4000
+port = 8888
+
+[[redirects]]
+from = "/*"
+to = "/register.html"
+status = 200
