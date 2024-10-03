@@ -22,21 +22,21 @@ const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUT
 // Objeto para armazenar códigos de verificação e telefones
 let verificationCodes = {};
 
-// Rota para redirecionar para a página de registro ao acessar a raiz do site
+// Rota para a raiz (/) redirecionando para a página de registro
 app.get('/', (req, res) => {
-    res.redirect('/register'); // Redireciona para a página de registro
+    res.redirect('/register');
 });
 
-// Rota para servir a página de registro
+// Rota para servir a página de registro diretamente
 app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
-// Rota para registrar um usuário e enviar um código de verificação
+// Rota para enviar o código de verificação
 app.post('/register', async (req, res) => {
     const { name, phone, event, date } = req.body;
     const verificationCode = Math.floor(1000 + Math.random() * 9000);
-    const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`; // Garantir que o número está no formato correto
+    const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
     try {
         // Enviar SMS via Twilio
@@ -45,8 +45,7 @@ app.post('/register', async (req, res) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-        console.log(`Mensagem enviada: ${message.sid}`);
-        verificationCodes[phone] = verificationCode; // Armazenar o código enviado
+        verificationCodes[phone] = verificationCode;
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
         // Enviar e-mail de notificação para o administrador
@@ -66,8 +65,6 @@ app.post('/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log('E-mail enviado para o administrador.');
-        
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
         res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
