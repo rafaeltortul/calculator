@@ -30,8 +30,9 @@ app.get('/', (req, res) => {
 
 // Rota para servir a página de registro diretamente
 app.get('/register', (req, res) => {
-    console.log("Servindo a página de registro");
-    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+    const filePath = path.join(__dirname, 'public', 'register.html');
+    console.log(`Servindo arquivo de registro: ${filePath}`);
+    res.sendFile(filePath);
 });
 
 // Rota para enviar o código de verificação
@@ -67,7 +68,6 @@ app.post('/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log('E-mail enviado para o administrador.');
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
         res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
