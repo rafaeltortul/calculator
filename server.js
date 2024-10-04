@@ -24,6 +24,7 @@ let verificationCodes = {};
 
 // Rota para a raiz (/) redirecionando para a página de registro
 app.get('/', (req, res) => {
+    console.log("Redirecionando para a página de registro"); // Adicionado para verificar o redirecionamento
     res.redirect('/register');
 });
 
@@ -52,14 +53,14 @@ app.post('/register', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'hotmail',
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: 'mais.flores@hotmail.com',
+                pass: 'NSF98095220'
             }
         });
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: process.env.EMAIL_USER,
+            from: 'mais.flores@hotmail.com',
+            to: 'mais.flores@hotmail.com',
             subject: 'Novo Registro na Calculadora de Eventos',
             text: `Novo registro: \n\nNome: ${name}\nTelefone: ${phone}\nEvento: ${event}\nData: ${date}`
         };
