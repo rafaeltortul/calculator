@@ -52,14 +52,14 @@ app.post('/register', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'hotmail',
             auth: {
-                user: 'mais.flores@hotmail.com',
-                pass: 'NSF98095220'
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             }
         });
 
         const mailOptions = {
-            from: 'mais.flores@hotmail.com',
-            to: 'mais.flores@hotmail.com',
+            from: process.env.EMAIL_USER,
+            to: process.env.EMAIL_USER,
             subject: 'Novo Registro na Calculadora de Eventos',
             text: `Novo registro: \n\nNome: ${name}\nTelefone: ${phone}\nEvento: ${event}\nData: ${date}`
         };
