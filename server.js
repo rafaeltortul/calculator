@@ -22,15 +22,20 @@ const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUT
 // Objeto para armazenar códigos de verificação e telefones
 let verificationCodes = {};
 
-// Rota para a raiz (/) redirecionando para a página de registro
-app.get('/', (req, res) => {
-    console.log("Redirecionando para a página de registro");
-    res.redirect('/register.html');
-});
-
 // Rota para servir a página de registro diretamente
 app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+// Forçar redirecionamento para a página de registro
+app.get('/', (req, res) => {
+    console.log("Redirecionando para /register");
+    res.redirect('/register');
+});
+
+// Forçar redirecionamento para qualquer outra rota que não seja /register ou /
+app.get('*', (req, res) => {
+    res.redirect('/register');
 });
 
 // Rota para enviar o código de verificação
@@ -82,11 +87,6 @@ app.post('/verify-code', (req, res) => {
     } else {
         res.status(400).json({ success: false, message: "Código inválido." });
     }
-});
-
-// Redirecionar qualquer outra rota não especificada para a página de registro
-app.get('*', (req, res) => {
-    res.redirect('/register.html');
 });
 
 // Definindo a porta para o servidor escutar
