@@ -37,25 +37,15 @@ span {
     font-weight: bold;
 }
 
-/* Estilos específicos para impressão */
-@media print {
-    body {
-        background-color: white;
-        color: black;
-        margin: 0;
-        padding: 0;
-    }
-    .container {
-        box-shadow: none;
-        max-width: 100%;
-    }
-    #adicionarFlor, #finalizarArranjo, button {
-        display: none;  /* Esconde botões na impressão */
-    }
-    h1, h2 {
-        color: black;
-    }
-    table {
-        margin: 0;  /* Reduz as margens para a impressão */
-    }
+button {
+    background-color: #374F37;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4a6a4a;
 }

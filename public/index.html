@@ -6,17 +6,6 @@
     <title>Calculadora de Flores para Eventos</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    <style>
-        /* Remove os botões de mais/menos dos inputs number */
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield; /* Firefox */
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -58,7 +47,6 @@
 
             <button id="adicionarFlor">Adicionar Flor</button>
             <button id="finalizarArranjo">Finalizar Arranjo</button>
-            <!-- Botão de Impressão da Receita sempre disponível -->
             <button id="imprimirReceita" onclick="imprimirReceita()">Imprimir Receita</button>
         </div>
 
@@ -85,103 +73,10 @@
                 </tfoot>
             </table>
 
-            <!-- Botão para imprimir o orçamento -->
             <button onclick="imprimirOrcamento()">Imprimir Orçamento</button>
         </div>
 
         <script src="script.js"></script>
-        <script>
-        function imprimirReceita() {
-            var tipoArranjo = document.getElementById('tipoArranjo').options[document.getElementById('tipoArranjo').selectedIndex].text;
-            var printContents = document.getElementById('receitaArranjo').cloneNode(true);
-
-            // Substituir o select pelo título do arranjo
-            var tipoArranjoLabel = document.createElement('h3');
-            tipoArranjoLabel.textContent = `Tipo de Arranjo: ${tipoArranjo}`;
-            var label = printContents.querySelector('label');
-            label.replaceWith(tipoArranjoLabel);
-
-            // Substituir os inputs por spans com os valores
-            var inputs = printContents.querySelectorAll('input');
-            inputs.forEach(input => {
-                var span = document.createElement('span');
-                if(input.type === 'number') {
-                    span.textContent = parseFloat(input.value || '0').toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                } else {
-                    span.textContent = input.value || '0'; // Exibir 0 se o valor estiver vazio
-                }
-                input.parentNode.replaceChild(span, input);
-            });
-
-            // Remover o select no pop-up
-            var selectElement = printContents.querySelector('select');
-            if (selectElement) {
-                var tipoArranjoSpan = document.createElement('span');
-                tipoArranjoSpan.textContent = tipoArranjo;
-                selectElement.parentNode.replaceChild(tipoArranjoSpan, selectElement);
-            }
-
-            // Abrir janela de impressão
-            var printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Imprimir Receita</title>');
-            printWindow.document.write('<link rel="stylesheet" href="styles.css">');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(printContents.outerHTML);
-
-            // Adicionar apenas o botão de imprimir
-            printWindow.document.write('<button onclick="window.print()">Imprimir</button>');
-            printWindow.document.write('<style>button:not([onclick*="window.print"]) { display: none; }</style>'); // Remover botões indesejados
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.focus();
-        }
-
-        function imprimirOrcamento() {
-            // Criar uma nova janela para imprimir apenas o orçamento da calculadora de flores
-            var printContents = document.getElementById('calcFlores').cloneNode(true);
-
-            // Substituir os inputs por spans com os valores
-            var inputs = printContents.querySelectorAll('input');
-            inputs.forEach(input => {
-                var span = document.createElement('span');
-                if(input.type === 'number') {
-                    span.textContent = parseFloat(input.value || '0').toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                } else {
-                    span.textContent = input.value || '0'; // Exibir 0 se o valor estiver vazio
-                }
-                input.parentNode.replaceChild(span, input);
-            });
-
-            // Abrir janela de impressão
-            var printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Imprimir Orçamento</title>');
-            printWindow.document.write('<link rel="stylesheet" href="styles.css">');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(printContents.outerHTML);
-
-            // Adicionar apenas os botões de imprimir e salvar como Excel
-            printWindow.document.write('<button onclick="window.print()">Imprimir</button>');
-            printWindow.document.write('<button onclick="salvarExcelPopUp()">Salvar como Excel</button>');
-            printWindow.document.write('<style>button:not([onclick*="window.print"], [onclick*="salvarExcelPopUp"]) { display: none; }</style>'); // Remover botões indesejados
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.focus();
-        }
-
-        function salvarExcelPopUp() {
-            var wb = XLSX.utils.book_new();
-            var ws_name = "Total Geral";
-
-            // Captura os dados da tabela de arranjos para exportação
-            var elt = document.getElementById('calcFloresTable');
-            var ws = XLSX.utils.table_to_sheet(elt);
-
-            XLSX.utils.book_append_sheet(wb, ws, ws_name);
-            XLSX.writeFile(wb, "Orçamento_Flores_Evento.xlsx");
-        }
-
-        </script>
     </div>
 </body>
 </html>
-
