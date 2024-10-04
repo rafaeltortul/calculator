@@ -25,14 +25,12 @@ let verificationCodes = {};
 // Rota para a raiz (/) redirecionando para a página de registro
 app.get('/', (req, res) => {
     console.log("Redirecionando para a página de registro");
-    res.redirect('/register');
+    res.redirect('/register.html');
 });
 
 // Rota para servir a página de registro diretamente
 app.get('/register', (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'register.html');
-    console.log(`Servindo arquivo de registro: ${filePath}`);
-    res.sendFile(filePath);
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Rota para enviar o código de verificação
@@ -88,8 +86,7 @@ app.post('/verify-code', (req, res) => {
 
 // Redirecionar qualquer outra rota não especificada para a página de registro
 app.get('*', (req, res) => {
-    console.log("Redirecionando rota desconhecida para a página de registro");
-    res.redirect('/register');
+    res.redirect('/register.html');
 });
 
 // Definindo a porta para o servidor escutar
