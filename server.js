@@ -22,6 +22,12 @@ const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUT
 // Objeto para armazenar códigos de verificação e telefones
 let verificationCodes = {};
 
+// Middleware para registrar cada requisição recebida
+app.use((req, res, next) => {
+    console.log(`Recebendo requisição: ${req.method} - ${req.url}`);
+    next();
+});
+
 // Rota para servir a página de registro diretamente na raiz (/)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
@@ -78,9 +84,14 @@ app.post('/verify-code', (req, res) => {
     }
 });
 
-// Servir a página da calculadora após a verificação
+// Rota para servir a página da calculadora
 app.get('/calculator', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Redirecionar qualquer outra rota não especificada para a página de registro
+app.get('*', (req, res) => {
+    res.redirect('/');
 });
 
 // Definindo a porta para o servidor escutar
