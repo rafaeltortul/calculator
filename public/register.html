@@ -7,15 +7,16 @@
     <!-- Incluindo o caminho correto para o CSS -->
     <link rel="stylesheet" href="/styles.css">
     <style>
-        /* Adicionando algumas correções rápidas inline para evitar o não carregamento do CSS */
+        /* Correções de layout */
         body {
             font-family: Arial, sans-serif;
             background-color: #f7f7f7;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 100vh; /* Ajusta a altura para caber tudo em uma tela */
             margin: 0;
+            overflow: hidden; /* Impede o scroll */
         }
 
         .form-container {
@@ -24,7 +25,9 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 350px; /* Diminuído para caber tudo */
+            height: auto;
+            box-sizing: border-box;
         }
 
         h2 {
@@ -34,14 +37,15 @@
 
         .logo {
             display: block;
-            margin: 0 auto 20px;
-            width: 150px;
+            margin: 0 auto 10px; /* Menor margem */
+            width: 120px; /* Reduzido para ajustar ao layout */
         }
 
         label {
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 8px;
             display: block;
+            font-size: 14px; /* Diminuído o tamanho da fonte */
         }
 
         input[type="text"],
@@ -49,10 +53,11 @@
         input[type="date"],
         input[type="email"] {
             width: 100%;
-            padding: 10px;
-            margin: 8px 0;
+            padding: 8px; /* Reduzido para caber melhor */
+            margin: 6px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 14px;
         }
 
         button {
@@ -64,6 +69,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 14px; /* Tamanho de fonte ajustado */
         }
 
         button:hover {
