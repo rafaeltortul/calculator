@@ -24,7 +24,7 @@ let verificationCodes = {};
 
 // Rota para redirecionar para a página de registro
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+    res.redirect(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Rota para enviar o código de verificação
