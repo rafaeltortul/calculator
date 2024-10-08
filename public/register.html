@@ -4,19 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro para Acesso a Calculadora de Eventos</title>
-    <!-- Incluindo o caminho correto para o CSS -->
     <link rel="stylesheet" href="/styles.css">
     <style>
-        /* Correções de layout */
+        /* Ajustes de layout para centralização */
         body {
             font-family: Arial, sans-serif;
             background-color: #f7f7f7;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Ajusta a altura para caber tudo em uma tela */
+            height: 100vh;
             margin: 0;
-            overflow: hidden; /* Impede o scroll */
         }
 
         .form-container {
@@ -25,38 +23,50 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 350px; /* Diminuído para caber tudo */
-            height: auto;
-            box-sizing: border-box;
+            max-width: 350px;
+            text-align: center;
         }
 
         h2 {
-            text-align: center;
             color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
         }
 
         .logo {
             display: block;
-            margin: 0 auto 10px; /* Menor margem */
-            width: 120px; /* Reduzido para ajustar ao layout */
+            margin: 0 auto 10px;
+            width: 120px;
         }
 
         label {
             font-weight: bold;
             margin-top: 8px;
             display: block;
-            font-size: 14px; /* Diminuído o tamanho da fonte */
+            font-size: 14px;
         }
 
         input[type="text"],
         input[type="tel"],
         input[type="date"],
-        input[type="email"] {
-            width: 100%;
-            padding: 8px; /* Reduzido para caber melhor */
+        input[type="number"] {
+            width: 90%; /* Ajuste da largura para todos os campos */
+            padding: 8px;
             margin: 6px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #phone-prefix {
+            margin-right: 5px;
             font-size: 14px;
         }
 
@@ -69,22 +79,23 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px; /* Tamanho de fonte ajustado */
+            font-size: 14px;
+            margin-top: 10px;
         }
 
         button:hover {
             background-color: #2f4231;
         }
 
-        .phone-input-container {
-            display: flex;
-            align-items: center;
+        #codeSection {
+            margin-top: 20px;
         }
 
-        #phone-prefix {
-            margin-right: 10px;
+        /* Ajuste do tamanho do container */
+        .form-container {
+            height: auto;
+            overflow: hidden;
         }
-
     </style>
 </head>
 <body>
@@ -117,6 +128,17 @@
         </div>
     </div>
 
-    <script src="/register.js"></script>
+    <script>
+        function generateCode() {
+            // Simulação de geração de código de verificação
+            document.getElementById('codeSection').style.display = 'block';
+            document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function verifyCode() {
+            // Simulação de verificação de código
+            alert("Código verificado com sucesso!");
+        }
+    </script>
 </body>
 </html>
