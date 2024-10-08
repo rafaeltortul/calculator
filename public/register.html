@@ -4,35 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro para Acesso a Calculadora de Eventos</title>
-    <!-- Certifique-se de que o caminho está correto, ajustando conforme sua estrutura -->
-    <link rel="stylesheet" href="./styles.css"> <!-- Caminho ajustado para o arquivo CSS -->
+    <!-- Incluindo o caminho correto para o CSS -->
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        /* Adicionando algumas correções rápidas inline para evitar o não carregamento do CSS */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            width: 150px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #374F37; /* Verde musgo */
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #2f4231;
+        }
+
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #phone-prefix {
+            margin-right: 10px;
+        }
+
+    </style>
 </head>
 <body>
     <div class="form-container">
-        <img src="./logo.png" alt="Logo" class="logo"> <!-- Caminho ajustado para o logo -->
+        <img src="/logo.png" alt="Logo" class="logo">
         <h2>Cadastro para Acesso a Calculadora de Eventos com Flores</h2>
         <form id="registerForm">
             <label for="name">Nome Completo:</label>
-            <input type="text" id="name" required><br>
+            <input type="text" id="name" required>
+
             <label for="phone">Telefone com DDD:</label>
             <div class="phone-input-container">
                 <span id="phone-prefix">+55</span>
                 <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required>
             </div>
+
             <label for="event">Nome do Evento:</label>
-            <input type="text" id="event" required><br>
+            <input type="text" id="event" required>
+
             <label for="date">Data do Evento:</label>
-            <input type="date" id="date" required><br>
+            <input type="date" id="date" required>
+
             <button type="button" onclick="generateCode()">Gerar Código de Verificação</button>
         </form>
+
         <div id="codeSection" style="display:none;">
             <label for="verificationCode">Código de Verificação:</label>
-            <input type="text" id="verificationCode" required><br>
+            <input type="text" id="verificationCode" required>
             <button type="button" onclick="verifyCode()">Continuar</button>
         </div>
     </div>
 
-    <!-- Certifique-se de que o caminho está correto, ajustando conforme sua estrutura -->
-    <script src="./register.js"></script> <!-- Caminho ajustado para o script JS -->
+    <script src="/register.js"></script>
 </body>
 </html>
