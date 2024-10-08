@@ -4,6 +4,9 @@ function generateCode() {
     const event = document.getElementById('event').value;
     const date = document.getElementById('date').value;
 
+    console.log("Iniciando o processo de geração de código...");
+    console.log("Dados enviados:", { name, phone, event, date });
+
     const data = {
         name,
         phone,
@@ -18,7 +21,13 @@ function generateCode() {
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log("Resposta recebida:", response);
+        if (!response.ok) {
+            throw new Error(`Erro no servidor: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(result => {
         if (result.success) {
             console.log("Código enviado com sucesso");
@@ -28,6 +37,6 @@ function generateCode() {
         }
     })
     .catch(error => {
-        console.error("Erro de rede:", error);
+        console.error("Erro de rede ou no servidor:", error);
     });
 }
