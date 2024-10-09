@@ -24,7 +24,8 @@ let verificationCodes = {};
 
 // Rota para redirecionar para a página de registro
 app.get('/', (req, res) => {
-    res.redirect(path.join(__dirname, 'public', 'register.html'));
+    console.log("Redirecionando para a página de registro...");
+    res.sendFile(path.join(__dirname, 'public', 'register.html')); // Corrigido para usar sendFile
 });
 
 // Rota para enviar o código de verificação
@@ -33,6 +34,8 @@ app.post('/register', async (req, res) => {
     const verificationCode = Math.floor(1000 + Math.random() * 9000);
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
+    console.log(`Recebido registro para ${name} com telefone ${phone}.`);
+    
     try {
         // Enviar SMS via Twilio
         const message = await client.messages.create({
@@ -40,6 +43,8 @@ app.post('/register', async (req, res) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
+
+        console.log(`Código de verificação enviado para ${formattedPhone}.`);
         verificationCodes[phone] = verificationCode;
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
@@ -60,6 +65,8 @@ app.post('/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
+        console.log("E-mail de notificação enviado.");
+        
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
         res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
@@ -70,16 +77,21 @@ app.post('/register', async (req, res) => {
 app.post('/verify-code', (req, res) => {
     const { phone, code } = req.body;
 
+    console.log(`Verificando código para o telefone ${phone}.`);
+
     if (verificationCodes[phone] && verificationCodes[phone] === parseInt(code)) {
         delete verificationCodes[phone]; // Limpar o código após a verificação
+        console.log("Código verificado com sucesso.");
         res.status(200).json({ success: true, message: "Código verificado com sucesso." });
     } else {
+        console.error("Código inválido.");
         res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
 
 // Redirecionar qualquer outra rota não especificada para a página de registro
 app.get('*', (req, res) => {
+    console.log("Rota não especificada, redirecionando para a página de registro.");
     res.redirect('/');
 });
 
