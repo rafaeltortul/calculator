@@ -13,24 +13,18 @@ const app = express();
 app.use(cors()); // Permitir requisições de diferentes origens
 app.use(bodyParser.json()); // Suporte para JSON-encoded bodies
 
-// Verificação de variáveis de ambiente
-if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
-    console.error("Erro: As variáveis de ambiente do Twilio não estão configuradas corretamente.");
-    process.exit(1); // Encerrar o servidor com erro
-}
+// Servir arquivos estáticos da pasta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuração do Twilio
 const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
-// Servir arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Objeto para armazenar códigos de verificação e telefones
 let verificationCodes = {};
 
 // Rota para redirecionar para a página de registro
 app.get('/', (req, res) => {
-    res.redirect('/register.html');
+    res.redirect(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Rota para enviar o código de verificação
@@ -47,28 +41,32 @@ app.post('/register', async (req, res) => {
             to: formattedPhone
         });
         verificationCodes[phone] = verificationCode;
-        res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
         // Enviar e-mail de notificação para o administrador
         const transporter = nodemailer.createTransport({
             service: 'hotmail',
             auth: {
-                user: 'mais.flores@hotmail.com',
-                pass: 'NSF98095220'
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             }
         });
 
         const mailOptions = {
-            from: 'mais.flores@hotmail.com',
-            to: 'mais.flores@hotmail.com',
+            from: process.env.EMAIL_USER,
+            to: process.env.ADMIN_EMAIL,
             subject: 'Novo Registro na Calculadora de Eventos',
             text: `Novo registro: \n\nNome: ${name}\nTelefone: ${phone}\nEvento: ${event}\nData: ${date}`
         };
 
         await transporter.sendMail(mailOptions);
+
+        // Responder ao cliente com sucesso
+        return res.status(200).json({ success: true, message: "Código de verificação enviado." });
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
-        res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
+
+        // Responder ao cliente com erro
+        return res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
     }
 });
 
@@ -78,9 +76,9 @@ app.post('/verify-code', (req, res) => {
 
     if (verificationCodes[phone] && verificationCodes[phone] === parseInt(code)) {
         delete verificationCodes[phone]; // Limpar o código após a verificação
-        res.status(200).json({ success: true, message: "Código verificado com sucesso." });
+        return res.status(200).json({ success: true, message: "Código verificado com sucesso." });
     } else {
-        res.status(400).json({ success: false, message: "Código inválido." });
+        return res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
 
