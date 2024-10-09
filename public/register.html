@@ -110,39 +110,76 @@
         <h2>Cadastro para Acesso a Calculadora de Eventos com Flores</h2>
         <form id="registerForm">
             <label for="name">Nome Completo:</label>
-            <input type="text" id="name" required>
+            <input type="text" id="name" required autocomplete="name">
 
             <label for="phone">Telefone com DDD:</label>
             <div class="phone-input-container">
                 <span id="phone-prefix">+55</span>
-                <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required>
+                <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required autocomplete="tel">
             </div>
 
             <label for="event">Nome do Evento:</label>
-            <input type="text" id="event" required>
+            <input type="text" id="event" required autocomplete="off">
 
             <label for="date">Data do Evento:</label>
-            <input type="date" id="date" required>
+            <input type="date" id="date" required autocomplete="bday">
 
             <button type="button" onclick="generateCode()">Gerar Código de Verificação</button>
         </form>
 
         <div id="codeSection" style="display:none;">
             <label for="verificationCode">Código de Verificação:</label>
-            <input type="text" id="verificationCode" required>
+            <input type="text" id="verificationCode" required autocomplete="off">
             <button type="button" onclick="verifyCode()">Continuar</button>
         </div>
     </div>
 
     <script>
         function generateCode() {
-            // Exibe o campo de verificação e rola para ele
-            document.getElementById('codeSection').style.display = 'block';
-            document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const event = document.getElementById('event').value;
+            const date = document.getElementById('date').value;
+
+            console.log("Iniciando o processo de geração de código...");
+            console.log("Dados enviados:", { name, phone, event, date });
+
+            const data = {
+                name,
+                phone,
+                event,
+                date
+            };
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                console.log("Resposta recebida:", response);
+                if (!response.ok) {
+                    throw new Error(`Erro no servidor: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    console.log("Código enviado com sucesso");
+                    document.getElementById('codeSection').style.display = 'block';
+                    document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    console.error("Erro ao enviar o código:", result.message);
+                }
+            })
+            .catch(error => {
+                console.error("Erro de rede ou no servidor:", error);
+            });
         }
 
         function verifyCode() {
-            // Simulação de verificação de código
             alert("Código verificado com sucesso!");
         }
     </script>
