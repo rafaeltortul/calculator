@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const { google } = require('googleapis');
 
 dotenv.config();
 
@@ -48,12 +49,16 @@ app.post('/register', async (req, res) => {
         verificationCodes[phone] = verificationCode;
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
-        // Enviar e-mail de notificação para o administrador
+        // Configuração OAuth2 para envio de e-mails via Hotmail
         const transporter = nodemailer.createTransport({
             service: 'hotmail',
             auth: {
+                type: 'OAuth2',
                 user: 'mais.flores@hotmail.com',
-                pass: 'NSF98095220'
+                clientId: process.env.OAUTH_CLIENT_ID,
+                clientSecret: process.env.OAUTH_CLIENT_SECRET,
+                refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+                accessToken: process.env.OAUTH_ACCESS_TOKEN
             }
         });
 
