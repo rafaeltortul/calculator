@@ -95,6 +95,7 @@
 
         #codeSection {
             margin-top: 20px;
+            display: none; /* Escondido até o código ser gerado */
         }
 
         /* Ajuste do tamanho do container */
@@ -127,7 +128,7 @@
             <button type="button" onclick="generateCode()">Gerar Código de Verificação</button>
         </form>
 
-        <div id="codeSection" style="display:none;">
+        <div id="codeSection">
             <label for="verificationCode">Código de Verificação:</label>
             <input type="text" id="verificationCode" required autocomplete="off">
             <button type="button" onclick="verifyCode()">Continuar</button>
@@ -141,8 +142,10 @@
             const event = document.getElementById('event').value;
             const date = document.getElementById('date').value;
 
-            console.log("Iniciando o processo de geração de código...");
-            console.log("Dados enviados:", { name, phone, event, date });
+            if (!name || !phone || !event || !date) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
 
             const data = {
                 name,
@@ -150,6 +153,8 @@
                 event,
                 date
             };
+
+            alert("Gerando código, por favor aguarde...");
 
             fetch('/register', {
                 method: 'POST',
@@ -159,7 +164,6 @@
                 body: JSON.stringify(data)
             })
             .then(response => {
-                console.log("Resposta recebida:", response);
                 if (!response.ok) {
                     throw new Error(`Erro no servidor: ${response.statusText}`);
                 }
@@ -167,20 +171,50 @@
             })
             .then(result => {
                 if (result.success) {
-                    console.log("Código enviado com sucesso");
                     document.getElementById('codeSection').style.display = 'block';
+                    alert("Código enviado com sucesso! Verifique seu celular.");
                     document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    console.error("Erro ao enviar o código:", result.message);
+                    alert("Erro ao enviar o código: " + result.message);
                 }
             })
             .catch(error => {
                 console.error("Erro de rede ou no servidor:", error);
+                alert("Erro ao tentar gerar o código. Tente novamente mais tarde.");
             });
         }
 
         function verifyCode() {
-            alert("Código verificado com sucesso!");
+            const phone = document.getElementById('phone').value;
+            const code = document.getElementById('verificationCode').value;
+
+            if (!phone || !code) {
+                alert("Por favor, preencha o número de telefone e o código de verificação.");
+                return;
+            }
+
+            const data = { phone, code };
+
+            fetch('/verify-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert("Código verificado com sucesso! Redirecionando para a calculadora...");
+                    window.location.href = '/index.html';
+                } else {
+                    alert("Código inválido, por favor tente novamente.");
+                }
+            })
+            .catch(error => {
+                console.error("Erro durante a verificação:", error);
+                alert("Erro durante a verificação. Tente novamente.");
+            });
         }
     </script>
 </body>
