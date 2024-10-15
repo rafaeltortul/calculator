@@ -64,9 +64,15 @@ app.post('/register', async (req, res) => {
             text: `Novo registro: \n\nNome: ${name}\nTelefone: ${phone}\nEvento: ${event}\nData: ${date}`
         };
 
-        await transporter.sendMail(mailOptions);
-        console.log("E-mail enviado para o administrador.");
-        
+        // Enviar e-mail e registrar sucesso ou falha
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Erro ao enviar e-mail:', error.message);
+            } else {
+                console.log('E-mail enviado com sucesso:', info.response);
+            }
+        });
+
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
         res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
