@@ -21,7 +21,6 @@ function generateCode() {
     };
 
     // Mostrar um indicador de carregamento
-    document.getElementById('codeSection').style.display = 'none';
     alert("Gerando código, por favor aguarde...");
 
     fetch('/register', {
@@ -41,8 +40,11 @@ function generateCode() {
     .then(result => {
         if (result.success) {
             console.log("Código enviado com sucesso");
+            
+            // Exibe a seção do código de verificação e rola para ela
             document.getElementById('codeSection').style.display = 'block';
             alert("Código enviado com sucesso! Verifique seu celular.");
+            document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
         } else {
             console.error("Erro ao enviar o código:", result.message);
             alert("Erro ao enviar o código: " + result.message);
@@ -51,5 +53,44 @@ function generateCode() {
     .catch(error => {
         console.error("Erro de rede ou no servidor:", error);
         alert("Erro ao tentar gerar o código. Tente novamente mais tarde.");
+    });
+}
+
+function verifyCode() {
+    const phone = document.getElementById('phone').value;
+    const code = document.getElementById('verificationCode').value;
+
+    if (!phone || !code) {
+        alert("Por favor, preencha o número de telefone e o código de verificação.");
+        return;
+    }
+
+    console.log("Verificando o código...", { phone, code });
+
+    const data = { phone, code };
+
+    fetch('/verify-code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            console.log("Código verificado com sucesso!");
+            alert("Código verificado com sucesso! Redirecionando para a calculadora...");
+
+            // Redireciona para a página da calculadora
+            window.location.href = '/index.html';
+        } else {
+            console.error("Falha na verificação do código:", result.message);
+            alert("Código inválido, por favor tente novamente.");
+        }
+    })
+    .catch(error => {
+        console.error("Erro durante a verificação:", error);
+        alert("Erro durante a verificação. Tente novamente.");
     });
 }
