@@ -4,6 +4,12 @@ function generateCode() {
     const event = document.getElementById('event').value;
     const date = document.getElementById('date').value;
 
+    // Verificando se os campos estão preenchidos
+    if (!name || !phone || !event || !date) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+    }
+
     console.log("Iniciando o processo de geração de código...");
     console.log("Dados enviados:", { name, phone, event, date });
 
@@ -13,6 +19,10 @@ function generateCode() {
         event,
         date
     };
+
+    // Mostrar um indicador de carregamento
+    document.getElementById('codeSection').style.display = 'none';
+    alert("Gerando código, por favor aguarde...");
 
     fetch('/register', {
         method: 'POST',
@@ -32,16 +42,14 @@ function generateCode() {
         if (result.success) {
             console.log("Código enviado com sucesso");
             document.getElementById('codeSection').style.display = 'block';
-            // Adicionando a exibição de mensagem de sucesso
-            alert("Código de verificação enviado com sucesso para o seu celular.");
-            document.getElementById('verificationCode').focus(); // Focar no campo de código de verificação
+            alert("Código enviado com sucesso! Verifique seu celular.");
         } else {
             console.error("Erro ao enviar o código:", result.message);
-            alert("Erro ao gerar o código. Por favor, tente novamente.");
+            alert("Erro ao enviar o código: " + result.message);
         }
     })
     .catch(error => {
         console.error("Erro de rede ou no servidor:", error);
-        alert("Ocorreu um erro ao gerar o código. Verifique sua conexão e tente novamente.");
+        alert("Erro ao tentar gerar o código. Tente novamente mais tarde.");
     });
 }
