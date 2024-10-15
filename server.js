@@ -84,14 +84,7 @@ app.get('*', (req, res) => {
     res.redirect('/');
 });
 
-// Definindo a porta para o servidor escutar
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-});
-
-
-// Definindo a porta para o servidor escutar
+// Definindo a porta para o servidor escutar (garantindo que a variável seja definida uma única vez)
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
