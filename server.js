@@ -10,8 +10,8 @@ const nodemailer = require('nodemailer');
 dotenv.config();
 
 const app = express();
-app.use(cors()); // Permitir requisições de diferentes origens
-app.use(bodyParser.json()); // Suporte para JSON-encoded bodies
+app.use(cors());
+app.use(bodyParser.json());
 
 // Servir arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
@@ -24,7 +24,7 @@ let verificationCodes = {};
 
 // Rota para redirecionar para a página de registro
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+    res.redirect(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Rota para enviar o código de verificação
@@ -33,6 +33,9 @@ app.post('/register', async (req, res) => {
     const verificationCode = Math.floor(1000 + Math.random() * 9000);
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
+    console.log("Dados recebidos para registro:", { name, phone, event, date });
+    console.log("Tentando enviar código de verificação para:", formattedPhone);
+
     try {
         // Enviar SMS via Twilio
         const message = await client.messages.create({
@@ -40,7 +43,10 @@ app.post('/register', async (req, res) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
+        console.log("Mensagem Twilio enviada com sucesso, SID:", message.sid);
+
         verificationCodes[phone] = verificationCode;
+        res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
         // Enviar e-mail de notificação para o administrador
         const transporter = nodemailer.createTransport({
@@ -59,8 +65,8 @@ app.post('/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        res.status(200).json({ success: true, message: "Código de verificação enviado." });
-
+        console.log("E-mail enviado para o administrador.");
+        
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
         res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
@@ -71,10 +77,12 @@ app.post('/register', async (req, res) => {
 app.post('/verify-code', (req, res) => {
     const { phone, code } = req.body;
 
+    console.log("Verificando código para o telefone:", phone);
     if (verificationCodes[phone] && verificationCodes[phone] === parseInt(code)) {
-        delete verificationCodes[phone]; // Limpar o código após a verificação
+        delete verificationCodes[phone];
         res.status(200).json({ success: true, message: "Código verificado com sucesso." });
     } else {
+        console.error("Código inválido para o telefone:", phone);
         res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
@@ -84,7 +92,7 @@ app.get('*', (req, res) => {
     res.redirect('/');
 });
 
-// Definindo a porta para o servidor escutar (garantindo que a variável seja definida uma única vez)
+// Definindo a porta para o servidor escutar
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
