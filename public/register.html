@@ -49,7 +49,7 @@
         input[type="text"],
         input[type="tel"],
         input[type="date"] {
-            width: 100%; /* Ajuste da largura para todos os campos */
+            width: 100%;
             padding: 8px;
             margin: 6px 0;
             border: 1px solid #ccc;
@@ -154,9 +154,10 @@
             .then(result => {
                 if (result.success) {
                     alert("Código de verificação gerado com sucesso.");
-                    document.getElementById('codeSection').style.display = 'block';
+                    document.getElementById('codeSection').style.display = 'block'; // Exibe o campo de código
+                    document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' }); // Rola para a seção de código
                 } else {
-                    alert("Erro ao gerar código de verificação.");
+                    alert("Erro ao gerar código de verificação: " + result.message);
                 }
             })
             .catch(error => {
@@ -185,7 +186,7 @@
             .then(result => {
                 if (result.success) {
                     alert("Código verificado com sucesso. Redirecionando para a calculadora.");
-                    window.location.href = '/index.html';
+                    window.location.href = '/index.html'; // Redireciona para a página da calculadora
                 } else {
                     alert("Código inválido.");
                 }
