@@ -48,9 +48,8 @@
 
         input[type="text"],
         input[type="tel"],
-        input[type="date"],
-        input[type="number"] {
-            width: 90%; /* Ajuste da largura para todos os campos */
+        input[type="date"] {
+            width: 100%; /* Ajuste da largura para todos os campos */
             padding: 8px;
             margin: 6px 0;
             border: 1px solid #ccc;
@@ -64,7 +63,7 @@
             justify-content: flex-start;
             align-items: center;
             gap: 5px;
-            width: 100%; /* Alinhar a largura do telefone com os demais campos */
+            width: 100%;
         }
 
         #phone-prefix {
@@ -73,12 +72,12 @@
         }
 
         #phone {
-            flex-grow: 1; /* O campo de telefone ocupa o espaço restante */
+            flex-grow: 1;
         }
 
         button {
             width: 100%;
-            background-color: #374F37; /* Verde musgo */
+            background-color: #374F37;
             color: white;
             padding: 10px;
             border: none;
@@ -94,14 +93,10 @@
         }
 
         #codeSection {
+            display: none;
             margin-top: 20px;
         }
 
-        /* Ajuste do tamanho do container */
-        .form-container {
-            height: auto;
-            overflow: hidden;
-        }
     </style>
 </head>
 <body>
@@ -110,26 +105,26 @@
         <h2>Cadastro para Acesso a Calculadora de Eventos com Flores</h2>
         <form id="registerForm">
             <label for="name">Nome Completo:</label>
-            <input type="text" id="name" required autocomplete="name">
+            <input type="text" id="name" required>
 
             <label for="phone">Telefone com DDD:</label>
             <div class="phone-input-container">
                 <span id="phone-prefix">+55</span>
-                <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required autocomplete="tel">
+                <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required>
             </div>
 
             <label for="event">Nome do Evento:</label>
-            <input type="text" id="event" required autocomplete="off">
+            <input type="text" id="event" required>
 
             <label for="date">Data do Evento:</label>
-            <input type="date" id="date" required autocomplete="bday">
+            <input type="date" id="date" required>
 
             <button type="button" onclick="generateCode()">Gerar Código de Verificação</button>
         </form>
 
-        <div id="codeSection" style="display:none;">
+        <div id="codeSection">
             <label for="verificationCode">Código de Verificação:</label>
-            <input type="text" id="verificationCode" required autocomplete="off">
+            <input type="text" id="verificationCode" required>
             <button type="button" onclick="verifyCode()">Continuar</button>
         </div>
     </div>
@@ -140,9 +135,6 @@
             const phone = document.getElementById('phone').value;
             const event = document.getElementById('event').value;
             const date = document.getElementById('date').value;
-
-            console.log("Iniciando o processo de geração de código...");
-            console.log("Dados enviados:", { name, phone, event, date });
 
             const data = {
                 name,
@@ -158,52 +150,49 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => {
-                console.log("Resposta recebida:", response);
-                if (!response.ok) {
-                    throw new Error(`Erro no servidor: ${response.statusText}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    console.log("Código enviado com sucesso");
+                    alert("Código de verificação gerado com sucesso.");
                     document.getElementById('codeSection').style.display = 'block';
-                    document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    console.error("Erro ao enviar o código:", result.message);
+                    alert("Erro ao gerar código de verificação.");
                 }
             })
             .catch(error => {
-                console.error("Erro de rede ou no servidor:", error);
+                alert("Erro ao gerar código de verificação.");
+                console.error(error);
             });
         }
 
         function verifyCode() {
-            const code = document.getElementById('verificationCode').value;
             const phone = document.getElementById('phone').value;
+            const code = document.getElementById('verificationCode').value;
+
+            const data = {
+                phone,
+                code
+            };
 
             fetch('/verify-code', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ phone, code })
+                body: JSON.stringify(data)
             })
-            .then(response => {
-                return response.json();
-            })
+            .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    alert("Código verificado com sucesso!");
-                    // Redirecionar para a página da calculadora
+                    alert("Código verificado com sucesso. Redirecionando para a calculadora.");
                     window.location.href = '/index.html';
                 } else {
-                    alert("Código de verificação inválido. Tente novamente.");
+                    alert("Código inválido.");
                 }
             })
             .catch(error => {
-                console.error("Erro ao verificar o código:", error);
+                alert("Erro ao verificar o código.");
+                console.error(error);
             });
         }
     </script>
