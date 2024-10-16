@@ -21,32 +21,25 @@ function generateCode() {
         },
         body: JSON.stringify(data)
     })
-    .then(response => {
-        console.log("Resposta recebida:", response);
-        if (!response.ok) {
-            throw new Error(`Erro no servidor: ${response.statusText}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(result => {
         if (result.success) {
-            console.log("Código enviado com sucesso");
+            alert("Código de verificação enviado com sucesso!");
             document.getElementById('codeSection').style.display = 'block';
             document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
         } else {
-            console.error("Erro ao enviar o código:", result.message);
+            alert("Erro ao enviar o código de verificação. Tente novamente mais tarde.");
         }
     })
     .catch(error => {
-        console.error("Erro de rede ou no servidor:", error);
+        console.error("Erro ao gerar código:", error);
+        alert("Erro ao gerar código. Verifique sua conexão e tente novamente.");
     });
 }
 
 function verifyCode() {
     const phone = document.getElementById('phone').value;
     const verificationCode = document.getElementById('verificationCode').value;
-
-    console.log("Verificando código...");
 
     const data = {
         phone,
@@ -60,26 +53,17 @@ function verifyCode() {
         },
         body: JSON.stringify(data)
     })
-    .then(response => {
-        console.log("Resposta recebida:", response);
-        if (!response.ok) {
-            throw new Error(`Erro no servidor: ${response.statusText}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(result => {
         if (result.success) {
-            console.log("Código verificado com sucesso");
             alert("Código verificado com sucesso!");
-            // Redirecionar para a calculadora
-            window.location.href = "/index.html";  // Certifique-se de que o caminho está correto
+            // Redirecionar para a página da calculadora
+            window.location.href = "/index.html";
         } else {
-            console.error("Código inválido:", result.message);
             alert("Código inválido. Tente novamente.");
         }
     })
     .catch(error => {
-        console.error("Erro ao verificar código:", error);
-        alert("Erro ao verificar o código. Tente novamente mais tarde.");
+        console.error("Erro ao verificar o código:", error);
     });
 }
