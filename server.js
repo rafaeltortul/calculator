@@ -1,3 +1,4 @@
+// Importando módulos necessários
 const express = require('express');
 const bodyParser = require('body-parser');
 const twilio = require('twilio');
@@ -9,31 +10,21 @@ const nodemailer = require('nodemailer');
 dotenv.config();
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cors()); // Permitir requisições de diferentes origens
+app.use(bodyParser.json()); // Suporte para JSON-encoded bodies
 
+// Servir arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Configuração do Twilio
 const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
+// Objeto para armazenar códigos de verificação e telefones
 let verificationCodes = {};
-
-// Configuração do Nodemailer
-const transporter = nodemailer.createTransport({
-    service: 'hotmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    secure: false,
-    tls: {
-        rejectUnauthorized: false
-    }
-});
 
 // Rota para redirecionar para a página de registro
 app.get('/', (req, res) => {
-    res.redirect('/register.html');
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Rota para enviar o código de verificação
@@ -42,24 +33,25 @@ app.post('/register', async (req, res) => {
     const verificationCode = Math.floor(1000 + Math.random() * 9000);
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
-    console.log(`Tentando enviar código de verificação para: ${formattedPhone}`);
-    console.log(`Código gerado: ${verificationCode}`);
-
     try {
         // Enviar SMS via Twilio
         const message = await client.messages.create({
-            body: `Olá ${name}, seu código de verificação na Calculadora Mais Flores é: ${verificationCode}`,
+            body: `Olá ${name}, seu código de verificação é: ${verificationCode}`,
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-        console.log(`Mensagem Twilio enviada com sucesso, SID: ${message.sid}`);
-
-        // Guardar o código para posterior verificação
         verificationCodes[phone] = verificationCode;
-
-        res.status(200).json({ success: true, message: "Código de verificação enviado." });
+        res.status(200).json({ success: true, message: "Código de verificação enviado com sucesso!" });
 
         // Enviar e-mail de notificação para o administrador
+        const transporter = nodemailer.createTransport({
+            service: 'hotmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: process.env.ADMIN_EMAIL,
@@ -68,8 +60,6 @@ app.post('/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log("E-mail de notificação enviado com sucesso.");
-        
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
         res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
@@ -80,25 +70,20 @@ app.post('/register', async (req, res) => {
 app.post('/verify-code', (req, res) => {
     const { phone, code } = req.body;
 
-    console.log(`Verificando código para o número: ${phone}`);
-    console.log(`Código recebido: ${code}`);
-    console.log(`Código esperado: ${verificationCodes[phone]}`);
-
     if (verificationCodes[phone] && verificationCodes[phone] === parseInt(code)) {
-        console.log("Código verificado com sucesso.");
-        delete verificationCodes[phone];
-        res.status(200).json({ success: true, message: "Código verificado com sucesso." });
+        delete verificationCodes[phone]; // Limpar o código após a verificação
+        res.status(200).json({ success: true, message: "Código verificado com sucesso!" });
     } else {
-        console.log("Código inválido.");
         res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
 
 // Redirecionar qualquer outra rota não especificada para a página de registro
 app.get('*', (req, res) => {
-    res.redirect('/register.html');
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
+// Definindo a porta para o servidor escutar
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
