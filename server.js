@@ -33,6 +33,8 @@ app.post('/register', async (req, res) => {
     const verificationCode = Math.floor(1000 + Math.random() * 9000);
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
+    console.log("Tentando enviar código de verificação para:", formattedPhone);
+    
     try {
         // Enviar SMS via Twilio
         const message = await client.messages.create({
@@ -40,7 +42,12 @@ app.post('/register', async (req, res) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-        verificationCodes[phone] = verificationCode;
+        console.log("Mensagem Twilio enviada com sucesso, SID:", message.sid);
+
+        // Armazenar o código de verificação
+        verificationCodes[formattedPhone] = verificationCode;
+        console.log("Código de verificação armazenado para o telefone:", formattedPhone, verificationCode);
+        
         res.status(200).json({ success: true, message: "Código de verificação enviado com sucesso!" });
 
         // Enviar e-mail de notificação para o administrador
@@ -60,6 +67,7 @@ app.post('/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
+        console.log("E-mail de notificação enviado.");
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
         res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
@@ -69,11 +77,16 @@ app.post('/register', async (req, res) => {
 // Rota para verificar o código de verificação
 app.post('/verify-code', (req, res) => {
     const { phone, code } = req.body;
+    const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
+    
+    console.log("Verificando o código para o telefone:", formattedPhone, "com código:", code);
 
-    if (verificationCodes[phone] && verificationCodes[phone] === parseInt(code)) {
-        delete verificationCodes[phone]; // Limpar o código após a verificação
+    if (verificationCodes[formattedPhone] && verificationCodes[formattedPhone] === parseInt(code)) {
+        delete verificationCodes[formattedPhone]; // Limpar o código após a verificação
+        console.log("Código verificado com sucesso!");
         res.status(200).json({ success: true, message: "Código verificado com sucesso!" });
     } else {
+        console.log("Código inválido.");
         res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
