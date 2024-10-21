@@ -4,114 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro para Acesso a Calculadora de Eventos</title>
-    <link rel="stylesheet" href="/styles.css">
-    <style>
-        /* Ajustes de layout para centralização */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .form-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 350px;
-            text-align: center;
-        }
-
-        h2 {
-            color: #333;
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-
-        .logo {
-            display: block;
-            margin: 0 auto 10px;
-            width: 120px;
-        }
-
-        label {
-            font-weight: bold;
-            margin-top: 8px;
-            display: block;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="tel"],
-        input[type="date"] {
-            width: 100%;
-            padding: 8px;
-            margin: 6px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        .phone-input-container {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 5px;
-            width: 100%;
-        }
-
-        #phone-prefix {
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        #phone {
-            flex-grow: 1;
-        }
-
-        button {
-            width: 100%;
-            background-color: #374F37;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #2f4231;
-        }
-
-        #codeSection {
-            display: none;
-            margin-top: 20px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="form-container">
-        <img src="/logo.png" alt="Logo" class="logo">
-        <h2>Cadastro para Acesso a Calculadora de Eventos com Flores</h2>
+        <h2>Cadastro para Acesso a Calculadora de Eventos</h2>
         <form id="registerForm">
             <label for="name">Nome Completo:</label>
             <input type="text" id="name" required>
 
             <label for="phone">Telefone com DDD:</label>
-            <div class="phone-input-container">
-                <span id="phone-prefix">+55</span>
-                <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required>
-            </div>
+            <input type="tel" id="phone" placeholder="(XX) XXXXX-XXXX" required>
 
             <label for="event">Nome do Evento:</label>
             <input type="text" id="event" required>
@@ -122,7 +25,7 @@
             <button type="button" onclick="generateCode()">Gerar Código de Verificação</button>
         </form>
 
-        <div id="codeSection">
+        <div id="codeSection" style="display:none;">
             <label for="verificationCode">Código de Verificação:</label>
             <input type="text" id="verificationCode" required>
             <button type="button" onclick="verifyCode()">Continuar</button>
@@ -136,65 +39,46 @@
             const event = document.getElementById('event').value;
             const date = document.getElementById('date').value;
 
-            const data = {
-                name,
-                phone,
-                event,
-                date
-            };
-
             fetch('/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify({ name, phone, event, date })
             })
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    alert("Código de verificação gerado com sucesso.");
-                    document.getElementById('codeSection').style.display = 'block'; // Exibe o campo de código
-                    document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' }); // Rola para a seção de código
+                    alert("Código gerado com sucesso!");
+                    document.getElementById('codeSection').style.display = 'block';
                 } else {
-                    alert("Erro ao gerar código de verificação: " + result.message);
+                    alert("Erro ao gerar o código: " + result.message);
                 }
             })
-            .catch(error => {
-                alert("Erro ao gerar código de verificação.");
-                console.error(error);
-            });
+            .catch(error => console.error("Erro:", error));
         }
 
         function verifyCode() {
             const phone = document.getElementById('phone').value;
-            const code = document.getElementById('verificationCode').value;
-
-            const data = {
-                phone,
-                code
-            };
+            const verificationCode = document.getElementById('verificationCode').value;
 
             fetch('/verify-code', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify({ phone, code: verificationCode })
             })
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    alert("Código verificado com sucesso. Redirecionando para a calculadora.");
-                    window.location.href = '/index.html'; // Redireciona para a página da calculadora
+                    alert("Código verificado com sucesso!");
+                    window.location.href = '/index.html';
                 } else {
-                    alert("Código inválido.");
+                    alert("Código inválido, tente novamente.");
                 }
             })
-            .catch(error => {
-                alert("Erro ao verificar o código.");
-                console.error(error);
-            });
+            .catch(error => console.error("Erro:", error));
         }
     </script>
 </body>
