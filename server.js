@@ -4,60 +4,55 @@ const twilio = require('twilio');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
-const session = require('express-session');
+const session = require('express-session'); // Importando a sessão
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json()); // Suporte para JSON-encoded bodies
-app.use(express.static(path.join(__dirname, 'public'))); // Servir arquivos estáticos
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuração da sessão
+// Configuração de sessão
 app.use(session({
-    secret: 'MaisFloresAuto', // use uma chave secreta forte e armazenada de maneira segura
+    secret: 'MaisFloresAuto',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // Altere para true se estiver usando HTTPS
+    cookie: { secure: false } // Use "true" se estiver usando HTTPS
 }));
 
 // Configuração do Twilio
 const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-// Objeto para armazenar códigos de verificação e telefones
-let verificationCodes = {};
+let verificationCodes = {}; // Objeto para armazenar códigos de verificação
 
-// Rota para redirecionar para a página de registro
+// Rota inicial para verificar se o usuário já foi autenticado
 app.get('/', (req, res) => {
     if (req.session.isVerified) {
-        res.sendFile(path.join(__dirname, 'public', 'index.html')); // Usuário já verificado, enviar para o index
+        res.redirect('/index'); // Redireciona para a página da calculadora se estiver autenticado
     } else {
-        res.sendFile(path.join(__dirname, 'public', 'register.html')); // Caso contrário, enviar para o registro
+        res.sendFile(path.join(__dirname, 'public', 'register.html')); // Senão, envia para o registro
     }
 });
 
-// Rota para enviar o código de verificação
+// Rota para enviar o código de verificação via SMS
 app.post('/register', async (req, res) => {
     const { name, phone, event, date } = req.body;
-    const verificationCode = Math.floor(1000 + Math.random() * 9000); // Gera um código de 4 dígitos
+    const verificationCode = Math.floor(1000 + Math.random() * 9000);
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
     try {
-        // Enviar SMS via Twilio
         const message = await client.messages.create({
             body: `Olá ${name}, seu código de verificação é: ${verificationCode}`,
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
 
-        // Armazenar o código de verificação em memória
-        verificationCodes[formattedPhone] = verificationCode;
-
+        verificationCodes[formattedPhone] = verificationCode; // Armazenar o código
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
     } catch (error) {
         console.error('Erro ao enviar SMS:', error.message);
-        res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
+        res.status(500).json({ success: false, message: "Erro ao enviar código de verificação." });
     }
 });
 
@@ -67,29 +62,28 @@ app.post('/verify-code', (req, res) => {
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
     if (verificationCodes[formattedPhone] && verificationCodes[formattedPhone] === parseInt(code)) {
-        req.session.isVerified = true; // Marcar o usuário como verificado
-        delete verificationCodes[formattedPhone]; // Remover o código após a verificação
-        res.status(200).json({ success: true, message: "Código verificado com sucesso." });
+        req.session.isVerified = true; // Marcar como autenticado
+        delete verificationCodes[formattedPhone]; // Remover o código armazenado
+        res.status(200).json({ success: true });
     } else {
         res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
 
-// Rota para redirecionar para a página de índice após verificação
+// Rota para redirecionar para a página da calculadora
 app.get('/index', (req, res) => {
     if (req.session.isVerified) {
-        res.sendFile(path.join(__dirname, 'public', 'index.html')); // Redirecionar apenas se o usuário estiver verificado
+        res.sendFile(path.join(__dirname, 'public', 'index.html')); // Se autenticado, envia a calculadora
     } else {
-        res.redirect('/'); // Caso contrário, redirecionar para a página de registro
+        res.redirect('/'); // Se não estiver autenticado, volta para o registro
     }
 });
 
-// Redirecionar qualquer outra rota não especificada para a página de registro
+// Redirecionar qualquer outra rota para o registro
 app.get('*', (req, res) => {
     res.redirect('/');
 });
 
-// Definindo a porta para o servidor escutar
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
