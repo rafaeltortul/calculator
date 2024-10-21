@@ -42,9 +42,9 @@ app.post('/register', async (req, res) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-        verificationCodes[formattedPhone] = verificationCode; // Armazenar o código usando o telefone formatado
-        console.log(`Mensagem Twilio enviada com sucesso, SID: ${message.sid}`);
-        console.log(`Código de verificação armazenado para o telefone: ${formattedPhone} ${verificationCode}`);
+        // Armazenar código e número
+        verificationCodes[formattedPhone] = verificationCode;
+        console.log(`Código gerado e armazenado para o telefone: ${formattedPhone}. Código: ${verificationCode}`);
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
         // Enviar e-mail de notificação para o administrador
@@ -74,16 +74,17 @@ app.post('/register', async (req, res) => {
 // Rota para verificar o código de verificação
 app.post('/verify-code', (req, res) => {
     const { phone, code } = req.body;
-    const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`; // Garantir que o formato do telefone seja o mesmo
+    const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`; // Formatar o telefone novamente
 
     console.log(`Verificando código para o telefone: ${formattedPhone}`);
     console.log(`Código esperado: ${verificationCodes[formattedPhone]}, Código recebido: ${code}`);
 
+    // Verificar se o código corresponde ao telefone
     if (verificationCodes[formattedPhone] && verificationCodes[formattedPhone] === parseInt(code)) {
         delete verificationCodes[formattedPhone]; // Limpar o código após a verificação
         res.status(200).json({ success: true, message: "Código verificado com sucesso." });
     } else {
-        console.error(`Código inválido para o telefone: ${formattedPhone}`);
+        console.error(`Código inválido para o telefone: ${formattedPhone}. Código esperado: ${verificationCodes[formattedPhone]}`);
         res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
