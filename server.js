@@ -42,10 +42,11 @@ app.post('/register', async (req, res) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-        
+
         // Armazenar código e número, garantindo formatação consistente
         verificationCodes[formattedPhone] = verificationCode;
         console.log(`Código gerado e armazenado para o telefone: ${formattedPhone}. Código: ${verificationCode}`);
+        console.log("Todos os códigos armazenados:", verificationCodes); // Adicionar este log para monitorar o estado
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
         // Enviar e-mail de notificação para o administrador
