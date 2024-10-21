@@ -4,7 +4,6 @@ const twilio = require('twilio');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
-const session = require('express-session'); // Usando express-session para gerenciar sessões
 
 dotenv.config();
 
@@ -13,33 +12,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuração da sessão
-app.use(session({
-    secret: 'MaisFloresAuto', // Chave secreta para criptografar sessões
-    resave: false,
-    saveUninitialized: false, 
-    cookie: { secure: false } // 'false' para HTTP, use 'true' para HTTPS
-}));
-
 // Objeto para armazenar códigos de verificação temporariamente
 let verificationCodes = {};
 
-// Rota inicial
+// Rota inicial (não precisamos mais redirecionar para o index aqui)
 app.get('/', (req, res) => {
-    if (req.session.isVerified) {
-        res.redirect('/index'); // Se estiver verificado, redireciona para o index
-    } else {
-        res.sendFile(path.join(__dirname, 'public', 'register.html')); // Caso contrário, abre a página de registro
-    }
-});
-
-// Rota para a página index (calculadora)
-app.get('/index', (req, res) => {
-    if (req.session.isVerified) {
-        res.sendFile(path.join(__dirname, 'public', 'index.html')); // Somente abre se a sessão estiver verificada
-    } else {
-        res.redirect('/'); // Se não estiver verificado, redireciona para o registro
-    }
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Enviar código de verificação via Twilio
@@ -70,7 +48,7 @@ app.post('/verify-code', (req, res) => {
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
     if (verificationCodes[formattedPhone] && verificationCodes[formattedPhone] === parseInt(code)) {
-        req.session.isVerified = true; // Marca o usuário como verificado na sessão
+        // Código verificado com sucesso
         delete verificationCodes[formattedPhone]; // Remove o código após verificação
         res.status(200).json({ success: true });
     } else {
@@ -78,9 +56,9 @@ app.post('/verify-code', (req, res) => {
     }
 });
 
-// Rota genérica para capturar qualquer outra rota e redirecionar para o registro
+// Rota genérica para capturar qualquer outra rota
 app.get('*', (req, res) => {
-    res.redirect('/'); // Redireciona para o registro caso não encontre a rota
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
 // Inicia o servidor
