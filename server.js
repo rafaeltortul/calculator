@@ -46,7 +46,9 @@ app.post('/register', async (req, res) => {
         // Armazenar código e número, garantindo formatação consistente
         verificationCodes[formattedPhone] = verificationCode;
         console.log(`Código gerado e armazenado para o telefone: ${formattedPhone}. Código: ${verificationCode}`);
-        console.log("Todos os códigos armazenados:", verificationCodes); // Adicionar este log para monitorar o estado
+        console.log("Todos os códigos armazenados:", verificationCodes);
+
+        // Enviar a resposta de sucesso antes de tentar enviar o e-mail
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
         // Enviar e-mail de notificação para o administrador
@@ -68,8 +70,8 @@ app.post('/register', async (req, res) => {
         await transporter.sendMail(mailOptions);
         console.log('E-mail enviado com sucesso');
     } catch (error) {
+        // Se o envio do e-mail falhar, apenas logue o erro, sem enviar outra resposta HTTP
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
-        res.status(500).json({ success: false, message: "Erro ao enviar o código de verificação.", error: error.message });
     }
 });
 
