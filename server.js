@@ -1,19 +1,25 @@
-// Importando módulos necessários
 const express = require('express');
 const bodyParser = require('body-parser');
 const twilio = require('twilio');
 const dotenv = require('dotenv');
-const cors = require('cors');
-const path = require('path');
 const nodemailer = require('nodemailer');
+const session = require('express-session');
+const path = require('path');
 
 dotenv.config();
 
 const app = express();
-app.use(cors()); // Permitir requisições de diferentes origens
-app.use(bodyParser.json()); // Suporte para JSON-encoded bodies
+app.use(bodyParser.json());
 
-// Servir arquivos estáticos da pasta 'public'
+// Sessão para armazenar a autenticação do usuário
+app.use(session({
+    secret: 'MaisFloresSecretKey',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Deixe `secure: true` para ambientes HTTPS
+}));
+
+// Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuração do Twilio
@@ -22,85 +28,63 @@ const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUT
 // Objeto para armazenar códigos de verificação e telefones
 let verificationCodes = {};
 
-// Rota para redirecionar para a página de registro
-app.get('/', (req, res) => {
-    res.redirect(path.join(__dirname, 'public', 'register.html'));
+// Verificar se o usuário está autenticado para acessar o index
+app.get('/index.html', (req, res) => {
+    if (req.session.isVerified) {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    } else {
+        res.redirect('/register.html');
+    }
 });
 
-// Rota para enviar o código de verificação
+// Página de registro
+app.get('/', (req, res) => {
+    res.redirect('/register.html');
+});
+
+// Rota para gerar o código de verificação
 app.post('/register', async (req, res) => {
     const { name, phone, event, date } = req.body;
     const verificationCode = Math.floor(1000 + Math.random() * 9000);
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
-    console.log(`Tentando enviar código de verificação para: ${formattedPhone}`);
-
     try {
         // Enviar SMS via Twilio
-        const message = await client.messages.create({
+        await client.messages.create({
             body: `Olá ${name}, seu código de verificação é: ${verificationCode}`,
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-
-        // Armazenar código e número, garantindo formatação consistente
-        verificationCodes[formattedPhone] = verificationCode;
-        console.log(`Código gerado e armazenado para o telefone: ${formattedPhone}. Código: ${verificationCode}`);
-        console.log("Todos os códigos armazenados:", verificationCodes);
-
-        // Enviar a resposta de sucesso antes de tentar enviar o e-mail
+        verificationCodes[phone] = verificationCode;
+        req.session.phone = phone;  // Armazena o número de telefone na sessão
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
-
-        // Enviar e-mail de notificação para o administrador
-        const transporter = nodemailer.createTransport({
-            service: 'hotmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: process.env.ADMIN_EMAIL,
-            subject: 'Novo Registro na Calculadora de Eventos',
-            text: `Novo registro: \n\nNome: ${name}\nTelefone: ${phone}\nEvento: ${event}\nData: ${date}`
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log('E-mail enviado com sucesso');
     } catch (error) {
-        // Se o envio do e-mail falhar, apenas logue o erro, sem enviar outra resposta HTTP
-        console.error('Erro ao enviar SMS ou e-mail:', error.message);
+        console.error('Erro ao enviar SMS:', error.message);
+        res.status(500).json({ success: false, message: "Erro ao enviar código de verificação.", error: error.message });
     }
 });
 
 // Rota para verificar o código de verificação
 app.post('/verify-code', (req, res) => {
     const { phone, code } = req.body;
-    const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`; // Formatar o telefone novamente
+    const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
-    console.log(`Verificando código para o telefone: ${formattedPhone}`);
-    console.log(`Código esperado: ${verificationCodes[formattedPhone]}, Código recebido: ${code}`);
-
-    // Verificar se o código corresponde ao telefone
     if (verificationCodes[formattedPhone] && verificationCodes[formattedPhone] === parseInt(code)) {
-        console.log('Código verificado com sucesso!');
-        delete verificationCodes[formattedPhone]; // Limpar o código após a verificação
+        req.session.isVerified = true;  // Marca o usuário como verificado na sessão
+        delete verificationCodes[formattedPhone];  // Remove o código de verificação armazenado
         res.status(200).json({ success: true, message: "Código verificado com sucesso." });
     } else {
-        console.error(`Código inválido para o telefone: ${formattedPhone}. Código esperado: ${verificationCodes[formattedPhone]}`);
         res.status(400).json({ success: false, message: "Código inválido." });
     }
 });
 
-// Redirecionar qualquer outra rota não especificada para a página de registro
+// Rota padrão para redirecionar não autenticados
 app.get('*', (req, res) => {
     res.redirect('/');
 });
 
-// Definindo a porta para o servidor escutar
-const PORT = process.env.PORT || 4000;
+// Iniciar o servidor
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
