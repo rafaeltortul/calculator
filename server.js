@@ -42,7 +42,8 @@ app.post('/register', async (req, res) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-        // Armazenar código e número
+        
+        // Armazenar código e número, garantindo formatação consistente
         verificationCodes[formattedPhone] = verificationCode;
         console.log(`Código gerado e armazenado para o telefone: ${formattedPhone}. Código: ${verificationCode}`);
         res.status(200).json({ success: true, message: "Código de verificação enviado." });
@@ -81,6 +82,7 @@ app.post('/verify-code', (req, res) => {
 
     // Verificar se o código corresponde ao telefone
     if (verificationCodes[formattedPhone] && verificationCodes[formattedPhone] === parseInt(code)) {
+        console.log('Código verificado com sucesso!');
         delete verificationCodes[formattedPhone]; // Limpar o código após a verificação
         res.status(200).json({ success: true, message: "Código verificado com sucesso." });
     } else {
