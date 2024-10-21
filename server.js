@@ -33,6 +33,8 @@ app.post('/register', async (req, res) => {
     const verificationCode = Math.floor(1000 + Math.random() * 9000);
     const formattedPhone = `+55${phone.replace(/[^0-9]/g, '')}`;
 
+    console.log(`Tentando enviar código de verificação para: ${formattedPhone}`);
+
     try {
         // Enviar SMS via Twilio
         const message = await client.messages.create({
@@ -41,9 +43,11 @@ app.post('/register', async (req, res) => {
             to: formattedPhone
         });
         verificationCodes[phone] = verificationCode;
-        console.log(`Código de verificação armazenado para o telefone: ${phone} ${verificationCode}`);
+        console.log(`Mensagem Twilio enviada com sucesso, SID: ${message.sid}`);
+        console.log(`Código de verificação armazenado para o telefone: ${formattedPhone} ${verificationCode}`);
+        res.status(200).json({ success: true, message: "Código de verificação enviado." });
 
-        // Tentar enviar o e-mail de notificação
+        // Enviar e-mail de notificação para o administrador
         const transporter = nodemailer.createTransport({
             service: 'hotmail',
             auth: {
@@ -60,18 +64,10 @@ app.post('/register', async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log('E-mail enviado com sucesso.');
-
-        // Enviar a resposta de sucesso ao cliente
-        res.status(200).json({ success: true, message: "Código de verificação enviado com sucesso." });
-
+        console.log('E-mail enviado com sucesso');
     } catch (error) {
         console.error('Erro ao enviar SMS ou e-mail:', error.message);
-
-        // Verificar se a mensagem SMS foi enviada com sucesso
-        if (!res.headersSent) {
-            res.status(500).json({ success: false, message: "Erro ao enviar o código de verificação." });
-        }
+        res.status(500).json({ success: false, message: "Erro ao enviar o código de verificação.", error: error.message });
     }
 });
 
