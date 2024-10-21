@@ -2,23 +2,18 @@ function generateCode() {
     const name = document.getElementById('name').value;
     const phone = document.getElementById('phone').value;
 
-    const data = {
-        name,
-        phone
-    };
+    const data = { name, phone };
 
     fetch('/register', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(result => {
         if (result.success) {
             alert("Código enviado com sucesso!");
-            document.getElementById('codeSection').style.display = 'block'; // Mostra o campo de código
+            document.getElementById('codeSection').style.display = 'block';
             document.getElementById('codeSection').scrollIntoView({ behavior: 'smooth' });
         } else {
             alert("Erro ao gerar código de verificação.");
@@ -36,16 +31,13 @@ function verifyCode() {
 
     fetch('/verify-code', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, code: verificationCode })
     })
     .then(response => response.json())
     .then(result => {
         if (result.success) {
             alert("Código verificado com sucesso!");
-            // Aqui forçamos o redirecionamento apenas no frontend
             window.location.href = "/index.html";
         } else {
             alert("Código inválido.");
