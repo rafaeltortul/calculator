@@ -18,12 +18,7 @@ function generateCode() {
         },
         body: JSON.stringify(data)
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Erro no servidor: ${response.statusText}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(result => {
         if (result.success) {
             alert("Código enviado com sucesso!");
@@ -50,16 +45,11 @@ function verifyCode() {
         },
         body: JSON.stringify({ phone, code: verificationCode })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Erro no servidor: ${response.statusText}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(result => {
         if (result.success) {
             alert("Código verificado com sucesso!");
-            window.location.href = "/index"; // Redirecionar para a página index após a verificação
+            window.location.href = "/index"; // Redirecionar para a calculadora após verificação
         } else {
             alert("Código inválido.");
         }
