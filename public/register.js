@@ -1,14 +1,10 @@
 function generateCode() {
     const name = document.getElementById('name').value;
     const phone = document.getElementById('phone').value;
-    const event = document.getElementById('event').value;
-    const date = document.getElementById('date').value;
 
     const data = {
         name,
-        phone,
-        event,
-        date
+        phone
     };
 
     fetch('/register', {
